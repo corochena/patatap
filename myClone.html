@@ -1,0 +1,67 @@
+<html>
+<head>
+<style>
+    * { margin: 0;}
+    canvas { background-color: black; margin: auto; display: block; }
+</style>    
+</head>
+    
+<body>
+    <canvas width="1360" height="660"></canvas>
+<script>
+    var canvas = document.querySelector("canvas");
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width;
+    var h = canvas.height;
+    
+    document.addEventListener("keydown", function(k) {
+        var x = Math.random()*w;
+        var y = Math.random()*h;
+        var r = Math.random()*h/8+h/32;
+        var color = rndColor();
+        var phi = Math.random()*Math.PI;
+        var n = [3,3,4,4,5,5,6,7,8,9,10,11,12,Infinity,Infinity][Math.floor(Math.random()*15)];
+        //drawPolygon(x,y,r,phi,color,n);
+        console.log("keydown");
+    })
+    
+    function drawPolygon(x,y,r,phi,color,n) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x+r*Math.cos(phi), y+r*Math.sin(phi));
+        if (n == Infinity)
+            ctx.arc(x,y,r,0,7);
+        else
+            for (var i=0; i<n; i++)
+                ctx.lineTo(x+r*Math.cos(2*Math.PI/n*i+phi), y+r*Math.sin(2*Math.PI/n*i+phi));
+        ctx.fill();
+        ctx.strokeStyle = "black";
+        ctx.strokeText(n,x-(n == Infinity ? 15:4),y);
+    }
+    
+    function rndColor() {
+        var col = "#";
+        var colors = ["red","yellow","blue","green","violet","maroon","silver","white","pink","goldenrod","brown"];
+        var knownColor = colors[Math.floor(Math.random()*colors.length)];
+        
+        for (var i=0; i<6; i++)
+            col += [0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f"][Math.floor(Math.random()*16)];
+        
+        var flag = Math.round(Math.random());
+        //console.log(flag ? col:knownColor);
+         
+        return flag ? col:knownColor;
+    }
+    
+    function animate(time) {
+        console.log("animate");
+        var r = 100 - time/10;
+        ctx.clearRect(0,0,w,h);
+        if (r > 1) drawPolygon(600,300,r,0,"white",Infinity);
+        requestAnimationFrame(animate);
+    }
+    
+    requestAnimationFrame(animate);
+</script>        
+</body>
+</html>

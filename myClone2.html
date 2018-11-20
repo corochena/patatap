@@ -1,0 +1,80 @@
+<html>
+<head>
+<style>
+    * { margin: 0;}
+    canvas { background-color: black; margin: auto; display: block; }
+</style>    
+</head>
+    
+<body>
+    <canvas width="1360" height="660"></canvas>
+<script>
+    var canvas = document.querySelector("canvas");
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width;
+    var h = canvas.height;
+    var figures = [];
+    var lastTime = null;
+    
+    document.addEventListener("keydown", function(k) {
+        var figure = {};
+        figure.x = Math.random()*w;
+        figure.y = Math.random()*h;
+        figure.r = Math.random()*h/8+h/16;
+        figure.color = rndColor();
+        figure.phi = Math.random()*Math.PI;
+        figure.n = [3,3,4,4,5,5,6,7,8,9,10,11,12,Infinity,Infinity][Math.floor(Math.random()*15)];
+        figures.push(figure);
+    })
+    
+    function drawPolygon(x,y,r,phi,color,n) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x+r*Math.cos(phi), y+r*Math.sin(phi));
+        if (n == Infinity)
+            ctx.arc(x,y,r,0,7);
+        else
+            for (var i=0; i<n; i++)
+                ctx.lineTo(x+r*Math.cos(2*Math.PI/n*i+phi), y+r*Math.sin(2*Math.PI/n*i+phi));
+        ctx.fill();
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText(n,x-(n == Infinity ? 24:4),y);
+    }
+    
+    function rndColor() {
+        var col = "#";
+        var colors = ["red","yellow","blue","green","violet","maroon","silver","white","pink","goldenrod","brown"];
+        var knownColor = colors[Math.floor(Math.random()*colors.length)];
+        
+        for (var i=0; i<6; i++)
+            col += [0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f"][Math.floor(Math.random()*16)];
+        
+        var flag = Math.round(Math.random());
+        
+        return flag ? col:knownColor;
+    }
+    
+    function animate(time) {
+        ctx.clearRect(0,0,w,h);
+        figures.forEach(function(figure) {
+            if (figure.r > 1) drawPolygon(figure.x,figure.y,figure.r,figure.phi,figure.color,figure.n);
+        });
+        
+        if (lastTime != null)
+            figures.forEach(function(figure) {
+                if (figure.r > 0) figure.r -= (time - lastTime) / 200;
+            });
+        
+        figures = figures.filter(function(figure) {
+            return figure.r > 0;
+        });
+
+        lastTime = time;
+        requestAnimationFrame(animate);
+    }
+    
+    requestAnimationFrame(animate);
+</script>        
+</body>
+</html>

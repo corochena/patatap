@@ -1,0 +1,102 @@
+<html>
+<head>
+<style>
+    * { margin: 0;}
+    canvas { background-color: black; margin: auto; display: block; }
+</style>    
+</head>
+    
+<body>
+    <canvas width="1360" height="660"></canvas>
+<script>
+    var canvas = document.querySelector("canvas");
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width;
+    var h = canvas.height;
+    var figures = [];
+    var lastTime = null;
+    var files = ['bubbles.mp3','clay.mp3','confetti.mp3','corona.mp3','dotted-spiral.mp3','flash-1.mp3','flash-2.mp3','flash-3.mp3','glimmer.mp3','moon.mp3','pinwheel.mp3','piston-1.mp3','piston-2.mp3','piston-3.mp3','prism-1.mp3','prism-2.mp3','prism-3.mp3','splits.mp3','squiggle.mp3','strike.mp3','suspension.mp3','timer.mp3','ufo.mp3','veil.mp3','wipe.mp3','zig-zag.mp3'];
+    var sounds = [];
+    
+    sounds = files.map(function(file) {
+        return new Audio("https://github.com/jonobr1/Neuronal-Synchrony/blob/master/assets/A/" + file);
+    });
+    
+    ctx.fillStyle = "white";
+    ctx.font = "60px Arial";
+    ctx.fillText("Tap a key", 5*w/12, h/2);
+    
+    document.addEventListener("keydown", function(k) {
+        //sounds[k.keyCode - 65].play();
+        playAudio();
+        var figure = {};
+        figure.x = Math.random()*3/4*w + w/8;
+        figure.y = Math.random()*3/4*h + h/8;
+        figure.r = Math.random()*h/3+h/4;
+        figure.color = rndColor();
+        figure.phi = Math.random()*Math.PI;
+        figure.n = [3,3,3,4,4,4,5,5,6,7,8,9,10,11,12,Infinity,Infinity,Infinity][Math.floor(Math.random()*18)];
+        figures.push(figure);
+        if (lastTime == null)
+            requestAnimationFrame(animate);
+    });
+    
+    function playAudio() {
+      var audio = sounds[0];
+      audio.type = 'audio/wav';
+
+      var playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+          playPromise.then(function () {
+              console.log('Playing....');
+          }).catch(function (error) {
+              console.log('Failed to play....' + error);
+          });
+      }
+    }
+    
+    function drawPolygon(x,y,r,phi,color,n) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x+r*Math.cos(phi), y+r*Math.sin(phi));
+        if (n == Infinity)
+            ctx.arc(x,y,r,0,7);
+        else
+            for (var i=0; i<n; i++)
+                ctx.lineTo(x+r*Math.cos(2*Math.PI/n*i+phi), y+r*Math.sin(2*Math.PI/n*i+phi));
+        ctx.fill();
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText(n,x-(n == Infinity ? 24:4),y);
+    }
+    
+    function rndColor() {
+        var col = "#";        
+        for (var i=0; i<6; i++)
+            col += [0,1,2,3,4,5,6,7,8,9,"a","b","c","d","e","f"][Math.floor(Math.random()*16)];
+        return col;
+    }
+    
+    function animate(time) {
+        ctx.clearRect(0,0,w,h);
+        
+        if (lastTime != null)
+            figures.forEach(function(figure) {
+                drawPolygon(figure.x,figure.y,figure.r,figure.phi,figure.color,figure.n);
+                figure.r -= (time - lastTime) / 5;
+                figure.phi += (time - lastTime) / 600;
+                if (Math.floor(time/100) % 10 == 0)
+                    figure.color = rndColor();
+            });
+        
+        figures = figures.filter(function(figure) {
+            return figure.r > 0;
+        });
+
+        lastTime = time;
+        requestAnimationFrame(animate);
+    }
+</script>
+</body>
+</html>
